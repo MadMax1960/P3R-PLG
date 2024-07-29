@@ -45,7 +45,9 @@ class ExportJSONOperator(bpy.types.Operator):
             if obj.type == 'MESH':
                 vertices = [{"X": round(vert.co.x, 4), "Y": round(vert.co.y, 4), "Z": round(vert.co.z, 4)} for vert in obj.data.vertices]
                 indices = [vertex for poly in obj.data.polygons for vertex in poly.vertices]
-                colors = [4294967295 for _ in vertices]  # Repeat the color value for each vertice
+                num_vertices = len(vertices)
+                half_point = num_vertices // 2
+                colors = [4294967295] * half_point + [4294967040] * (num_vertices - half_point)
 
                 # Calculate bounding box
                 xs = [v["X"] for v in vertices]
@@ -71,4 +73,3 @@ class ExportJSONOperator(bpy.types.Operator):
 
 def menu_func_export(self, context):
     self.layout.operator(ExportJSONOperator.bl_idname, text="Export JSON")
-
