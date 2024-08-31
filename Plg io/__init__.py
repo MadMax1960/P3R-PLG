@@ -3,7 +3,7 @@ bl_info = {
     "blender": (2, 80, 0),
     "category": "Import-Export",
     "version": (1, 0, 0),
-    "author": "Ronald Reagen",
+    "author": "Mudkip",
     "description": "Import and Export PLG JSON files",
 }
 
