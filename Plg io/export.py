@@ -45,9 +45,19 @@ class ExportJSONOperator(bpy.types.Operator):
             if obj.type == 'MESH':
                 vertices = [{"X": round(vert.co.x, 4), "Y": round(vert.co.y, 4), "Z": round(vert.co.z, 4)} for vert in obj.data.vertices]
                 indices = [vertex for poly in obj.data.polygons for vertex in poly.vertices]
-                num_vertices = len(vertices)
-                half_point = num_vertices // 2
-                colors = [4294967295] * half_point + [4294967040] * (num_vertices - half_point)
+
+                # Initialize colors list
+                colors = [0 for _ in vertices]
+                color_layer = obj.data.vertex_colors.active
+                if color_layer:
+                    for poly in obj.data.polygons:
+                        for loop_index in poly.loop_indices:
+                            loop_vert_index = obj.data.loops[loop_index].vertex_index
+                            vert_color = color_layer.data[loop_index].color
+                            if vert_color[:3] == (0, 0, 0):  # Check for black color
+                                colors[loop_vert_index] = 4294967040
+                            elif vert_color[:3] == (1, 1, 1):  # Check for white color
+                                colors[loop_vert_index] = 4294967295
 
                 # Calculate bounding box
                 xs = [v["X"] for v in vertices]
@@ -73,3 +83,14 @@ class ExportJSONOperator(bpy.types.Operator):
 
 def menu_func_export(self, context):
     self.layout.operator(ExportJSONOperator.bl_idname, text="Export JSON")
+
+def register():
+    bpy.utils.register_class(ExportJSONOperator)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+
+def unregister():
+    bpy.utils.unregister_class(ExportJSONOperator)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+if __name__ == "__main__":
+    register()
